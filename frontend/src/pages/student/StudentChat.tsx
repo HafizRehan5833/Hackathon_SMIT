@@ -273,12 +273,25 @@ export default function StudentChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
+        {/* Admission Button and Input */}
         <div className="border-t border-primary/20 py-4">
+          <div className="flex mb-2">
+            <Button
+              type="button"
+              className="bg-secondary text-secondary-foreground border border-primary mr-2"
+              onClick={() => setInputMessage('add a student My name is jawad.My id is 245290.My age is 18.My email is mrjawadhere@gmail.com.My department is Software_enginering')}
+            >
+              Admission
+            </Button>
+          </div>
           <form onSubmit={handleSendMessage} className="flex space-x-2">
             <Input
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
+              onFocus={() => {
+                const admissionMsg = 'add a student My name is jawad.My id is 245290.My age is 18.My email is mrjawadhere@gmail.com.My department is Software_enginering';
+                if (inputMessage === admissionMsg) setInputMessage('');
+              }}
               placeholder="Ask me anything about university services..."
               className="flex-1 neon-border bg-input text-foreground placeholder:text-muted-foreground"
               disabled={isLoading}
