@@ -26,12 +26,8 @@ const Login = () => {
           title: "Login Successful",
           description: "Welcome to University Portal!",
         });
-        // Redirect based on email domain or role
-        if (email.includes('admin')) {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/student/chat');
-        }
+        // Always redirect to the specified admin dashboard URL after login
+        window.location.href = 'http://192.168.18.94:8080/admin/dashboard';
       } else {
         throw new Error(response.data?.message || 'Email does not exist or password is incorrect');
       }

@@ -49,23 +49,23 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     /* Neon Glow Effects */
-    --glow-primary: 0 0 20px hsl(160 100% 50% / 0.3);
-    --glow-secondary: 0 0 10px hsl(160 100% 50% / 0.2);
-    --glow-intense: 0 0 30px hsl(160 100% 50% / 0.5);
+    --glow-primary: 0 0 20px hsla(247, 98%, 48%, 0.2);
+    --glow-secondary: 0 0 10px hsla(247, 98%, 48%, 0.2);
+    --glow-intense: 0 0 30px hhsla(247, 98%, 48%, 0.2);
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(160 100% 50% / 0.1), hsl(160 100% 50% / 0.05));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 5%), hsl(0 0% 8%));
-    --gradient-glow: linear-gradient(135deg, hsl(160 100% 50% / 0.1), transparent);
+    --gradient-primary: linear-gradient(135deg, hsla(247, 98%, 48%, 0.1), hsla(247, 98%, 48%, 0.05));
+    --gradient-card: linear-gradient(135deg, hsla(0, 0%, 5%), hsla(0, 0%, 8%));
+    --gradient-glow: linear-gradient(135deg, hsla(247, 98%, 48%, 0.1), transparent);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-glow: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Shadows */
-    --shadow-glow: 0 0 20px hsl(160 100% 50% / 0.2);
-    --shadow-card: 0 4px 16px hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 8px 32px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 20px hsla(247, 98%, 48%, 0.2);
+    --shadow-card: 0 4px 16px hsla(0, 0%, 0%, 0.3);
+    --shadow-elevated: 0 8px 32px  hsla(0, 0%, 0%, 0.4);
   }
 
   /* Custom Utility Classes */

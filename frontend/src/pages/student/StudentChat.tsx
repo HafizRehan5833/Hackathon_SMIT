@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Send, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Send, MessageCircle, ArrowLeft, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -19,6 +19,7 @@ export default function StudentChat() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string>('');
+  const [threads, setThreads] = useState<{thread_id: string, created: string, firstUserMsg?: string}[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -32,18 +33,33 @@ export default function StudentChat() {
     if (existingThreadId) {
       setThreadId(existingThreadId);
     } else {
-      const newThreadId = uuidv4();
-      setThreadId(newThreadId);
-      navigate(`/student/chat?thread=${newThreadId}`, { replace: true });
+      // Create thread from backend
+      studentAPI.createThread().then(res => {
+        const newThreadId = res.data.thread_id;
+        setThreadId(newThreadId);
+        navigate(`/student/chat?thread=${newThreadId}`, { replace: true });
+      });
     }
-
     // Welcome message
     setMessages([{
       role: 'assistant',
       content: 'Hello! I\'m your University Portal assistant. How can I help you today?',
       timestamp: new Date(),
     }]);
+    // Fetch all threads for sidebar
+    fetchThreads();
   }, [location.search, navigate]);
+
+  // Fetch all threads for sidebar
+  const fetchThreads = async () => {
+    // Fetch all system messages (thread creation) from backend
+    try {
+      const res = await studentAPI.getThreads();
+      setThreads(res.data.threads || []);
+    } catch (e) {
+      setThreads([]);
+    }
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -112,21 +128,88 @@ export default function StudentChat() {
     }
   };
 
-  const handleNewThread = () => {
-    const newThreadId = uuidv4();
-    setMessages([{
-      role: 'assistant',
-      content: 'Hello! I\'m your University Portal assistant. How can I help you today?',
-      timestamp: new Date(),
-    }]);
-    navigate(`/student/chat?thread=${newThreadId}`);
+  const handleNewThread = async () => {
+    try {
+      const res = await studentAPI.createThread();
+      const newThreadId = res.data.thread_id;
+      setMessages([{
+        role: 'assistant',
+        content: 'Hello! I\'m your University Portal assistant. How can I help you today?',
+        timestamp: new Date(),
+      }]);
+      navigate(`/student/chat?thread=${newThreadId}`);
+      fetchThreads();
+    } catch (e) {
+      toast({ title: 'Error', description: 'Could not create new chat thread', variant: 'destructive' });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-background border-b border-primary/20 px-4 py-4">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+  <div className="min-h-screen bg-background flex flex-row">
+      {/* Sidebar */}
+      <aside className="w-72 bg-card border-r border-primary/20 flex flex-col p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-primary">Chats</h2>
+          <Button
+            onClick={handleNewThread}
+            variant="outline"
+            size="sm"
+            className="border-primary text-primary hover:bg-primary/10"
+          >
+            New Chat
+          </Button>
+        </div>
+  <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1">
+          {threads.map((t, idx) => (
+            <div
+              key={t.thread_id}
+              className={`rounded-lg p-3 flex items-center group cursor-pointer border transition-all shadow-sm ${t.thread_id === threadId ? 'bg-primary/10 border-primary ring-2 ring-primary' : 'border-transparent hover:bg-primary/5 hover:border-primary/40'}`}
+              style={{ minHeight: 56, justifyContent: 'center' }}
+            >
+              <div
+                className="flex-1 min-w-0"
+                onClick={() => navigate(`/student/chat?thread=${t.thread_id}`)}
+              >
+                <div className="font-semibold text-foreground truncate" style={{ fontSize: 15 }}>
+                  {t.firstUserMsg ? t.firstUserMsg.slice(0, 40) : <span className="italic text-muted-foreground">No user message</span>}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1" style={{ fontFamily: 'monospace' }}>
+                  {new Date(t.created).toLocaleString()}
+                </div>
+              </div>
+              <button
+                className="ml-2 p-1 rounded hover:bg-destructive/20 text-destructive opacity-70 hover:opacity-100 transition-opacity"
+                title="Delete thread"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (window.confirm('Delete this chat and all its messages?')) {
+                    try {
+                      await studentAPI.deleteThread(t.thread_id);
+                      fetchThreads();
+                      // If deleted thread is active, clear chat and redirect
+                      if (t.thread_id === threadId) {
+                        setMessages([]);
+                        setThreadId('');
+                        navigate('/student/chat');
+                      }
+                    } catch {
+                      toast({ title: 'Error', description: 'Could not delete thread', variant: 'destructive' });
+                    }
+                  }
+                }}
+                tabIndex={-1}
+                type="button"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </aside>
+      {/* Main Chat Area */}
+  <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-background border-b border-primary/20 px-4 py-4">
           <div className="flex items-center">
             <Button
               variant="ghost"
@@ -144,19 +227,8 @@ export default function StudentChat() {
               </h1>
             </div>
           </div>
-          
-          <Button
-            onClick={handleNewThread}
-            variant="outline"
-            size="sm"
-            className="border-primary text-primary hover:bg-primary/10"
-          >
-            New Chat
-          </Button>
-        </div>
-      </header>
-
-  {/* Chat Messages */}
+        </header>
+        {/* Chat Messages */}
   <div className="flex-1 overflow-hidden flex flex-col max-w-4xl mx-auto w-full px-4">
         <div className="flex-1 overflow-y-auto py-6 space-y-4">
           {messages.map((message, index) => (
@@ -222,5 +294,6 @@ export default function StudentChat() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

@@ -23,6 +23,8 @@ export const studentAPI = {
   createThread: () => api.post('/students/thread'),
   sendMessage: (threadId: string, userInput: string) =>
     api.post('/students/chat', { thread_id: threadId, user_input: userInput }),
+  getThreads: () => api.get('/students/threads'),
+  deleteThread: (threadId: string) => api.delete(`/students/thread/${threadId}`),
 };
 
 // User API calls
