@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-dotenv
+pymongo
+passlib
+pyjwt
+openai
+langchain
+langchain-community
+langchain-groq
+bson
+email-validator
+rpds-py
+typing-extensions
